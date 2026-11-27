@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Retainer Reality</title>
+<style>
+:root{
+  --plum:#5B2A6E; --plum-2:#7A3F91; --gold:#B88A2C; --gold-soft:#F0E4C6;
+  --ink:#1A1526; --ink-2:#4A4160; --muted:#736B82;
+  --paper:#F7F4EF; --card:#FFFFFF; --line:#E4DCD0;
+  --ok:#2E6B4F; --warn:#9B5523; --bad:#9B2D2D; --bad-bg:#FAEBEA;
+  --shadow:0 1px 2px rgba(26,21,38,.05),0 6px 20px rgba(26,21,38,.06);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+}
+:root:not([data-theme="light"]){ }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --plum:#C9A0DC; --plum-2:#B98ACC; --gold:#D9AE5A; --gold-soft:#3A3226;
+    --ink:#F2EFF5; --ink-2:#C9C2D4; --muted:#9A92A8;
+    --paper:#16131C; --card:#211C2A; --line:#332C40;
+    --ok:#6FCF9B; --warn:#E0A56A; --bad:#F08A85; --bad-bg:#3A2321;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --plum:#C9A0DC; --plum-2:#B98ACC; --gold:#D9AE5A; --gold-soft:#3A3226;
+  --ink:#F2EFF5; --ink-2:#C9C2D4; --muted:#9A92A8;
+  --paper:#16131C; --card:#211C2A; --line:#332C40;
+  --ok:#6FCF9B; --warn:#E0A56A; --bad:#F08A85; --bad-bg:#3A2321;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+}
+*{box-sizing:inherit;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{
+  display:flex;flex-direction:column;background:var(--paper);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
+}
+
+/* ---------- header ---------- */
+header{
+  flex:none;background:var(--card);border-bottom:1px solid var(--line);
+  padding:12px 18px 11px;display:flex;align-items:center;gap:10px;
+}
+header .brand{display:flex;flex-direction:column;line-height:1.14}
+header .biz{font-size:10px;font-weight:800;letter-spacing:.15em;color:var(--gold)}
+header .mark{font-weight:800;font-size:17px;color:var(--plum);letter-spacing:-.2px}
+header .sub{font-size:10.5px;color:var(--muted);margin-left:auto;font-weight:600;text-align:right;line-height:1.3}
+.tagline{font-size:14px;color:var(--plum);font-weight:700;margin:0 0 14px;line-height:1.4}
+.byline{font-size:12px;color:var(--muted);line-height:1.55;margin-top:18px;padding:0 2px}
+.byline b{color:var(--plum);font-weight:700}
+.err{display:none;background:var(--bad-bg);color:var(--bad);border-radius:11px;padding:13px 15px;font-size:14.5px;font-weight:600;line-height:1.45;margin-top:14px}
+.err.on{display:block}
+
+/* ---------- main ---------- */
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 16px 28px;max-width:640px;width:100%;margin:0 auto}
+.screen{display:none}
+.screen.on{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+h2{font-size:21px;margin:0 0 4px;letter-spacing:-.3px}
+.lede{font-size:14px;color:var(--muted);margin:0 0 18px;line-height:1.5}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h3{margin:0 0 12px;font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--plum);font-weight:700}
+
+/* big number */
+.big{font-size:clamp(38px,12vw,52px);font-weight:800;letter-spacing:-1.5px;line-height:1;margin:2px 0 6px}
+.big.ok{color:var(--ink)} .big.warn{color:var(--warn)} .big.bad{color:var(--bad)}
+.biglabel{font-size:13px;color:var(--muted);font-weight:600}
+
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:14px 0 8px}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--ok);transition:width .4s ease}
+.bar i.warn{background:var(--warn)} .bar i.bad{background:var(--bad)}
+
+.alert{border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;margin-top:4px}
+.alert.ok{background:var(--gold-soft);color:var(--ink)}
+.alert.warn{background:var(--gold-soft);color:var(--ink);border-left:4px solid var(--warn)}
+.alert.bad{background:var(--bad-bg);color:var(--ink);border-left:4px solid var(--bad)}
+.alert b{font-weight:700}
+
+/* rows */
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:15px}
+.row:last-child{border-bottom:none}
+.row .k{color:var(--ink-2)}
+.row .v{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.row .v.sm{font-weight:600;color:var(--muted);font-size:14px}
+
+/* runway */
+.runway{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.runway > div{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 8px;text-align:center}
+.runway .n{font-size:22px;font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.runway .t{font-size:11px;color:var(--muted);margin-top:3px;font-weight:600;line-height:1.3}
+
+/* forms */
+label{display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin:14px 0 6px}
+input,select,textarea{
+  width:100%;font-size:16px;font-family:inherit;color:var(--ink);background:var(--card);
+  border:1.5px solid var(--line);border-radius:11px;padding:12px 13px;appearance:none;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--plum)}
+textarea{min-height:74px;resize:vertical;line-height:1.45}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:38px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hint{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.45}
+
+button{font-family:inherit;font-size:16px;font-weight:700;border:none;border-radius:12px;padding:15px;width:100%;background:var(--plum);color:#fff;cursor:pointer;margin-top:18px}
+button:active{transform:scale(.99)}
+button.ghost{background:transparent;color:var(--plum);border:1.5px solid var(--line);margin-top:10px}
+.btnlink{display:block;text-align:center;text-decoration:none;font-family:inherit;font-size:16px;font-weight:700;border-radius:12px;padding:15px;background:transparent;color:var(--plum);border:1.5px solid var(--line);margin-top:10px}
+button.danger{background:transparent;color:var(--bad);border:1.5px solid var(--line);font-size:14px;padding:12px}
+
+/* segmented */
+.seg{display:flex;gap:8px;margin-top:6px}
+.seg.four{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{margin:0;flex:1;padding:12px 6px;font-size:14px;background:var(--card);color:var(--ink-2);border:1.5px solid var(--line)}
+.seg.four button{flex:none;width:100%}
+.seg button.sel{background:var(--plum);color:#fff;border-color:var(--plum)}
+
+/* charge list */
+.chg{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.chg .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.chg .d{font-size:15px;font-weight:600;line-height:1.35}
+.chg .a{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chg .meta{font-size:12.5px;color:var(--muted);margin-top:6px}
+.flag{display:inline-block;font-size:12px;font-weight:700;border-radius:8px;padding:5px 9px;margin:8px 6px 0 0;line-height:1.3}
+.flag.rate{background:var(--bad-bg);color:var(--bad)}
+.flag.miss{background:var(--gold-soft);color:var(--warn)}
+.del{background:none;border:none;color:var(--muted);font-size:13px;padding:8px 0 0;width:auto;margin:0;font-weight:600}
+
+/* questions */
+.q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:10px;box-shadow:var(--shadow)}
+.q .say{font-size:15.5px;line-height:1.45;font-weight:600}
+.q .why{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5}
+.qgroup{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);font-weight:800;margin:22px 0 10px}
+.qgroup:first-child{margin-top:0}
+
+.empty{text-align:center;color:var(--muted);font-size:14.5px;padding:34px 18px;line-height:1.6}
+
+/* nav */
+nav{
+  flex:none;background:var(--card);border-top:1px solid var(--line);
+  display:flex;padding-bottom:calc(4px + env(safe-area-inset-bottom,0px));
+}
+nav button{
+  margin:0;background:none;border:none;color:var(--muted);flex:1;padding:10px 2px 8px;
+  font-size:11px;font-weight:700;border-radius:0;display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+nav button.on{color:var(--plum)}
+nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.foot{font-size:12px;color:var(--muted);line-height:1.55;margin-top:20px;padding:0 2px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="biz">AI FIRST CONTACT</span>
+    <span class="mark">Retainer Reality</span>
+  </div>
+  <span class="sub" id="hdrNote">Private to<br>this phone</span>
+</header>
+
+<main>
+
+  <!-- ============ SETUP ============ -->
+  <section class="screen" id="s-setup">
+    <h2>Set up your case</h2>
+    <p class="tagline">Represented or not, you are the CEO of your own case.</p>
+    <p class="lede">Enter what you were quoted. Nothing here leaves your phone. No account, no sign-in, nobody sees it.</p>
+
+    <div class="card">
+      <h3>The money</h3>
+      <label for="i-ret">Retainer you paid</label>
+      <input id="i-ret" type="text" inputmode="decimal" autocomplete="off" placeholder="5000" min="0" step="any">
+      <label for="i-add">Additional paid since (if any)</label>
+      <input id="i-add" type="text" inputmode="decimal" autocomplete="off" placeholder="0" min="0" step="any">
+      <label for="i-thr">Warn me when the balance drops below</label>
+      <input id="i-thr" type="text" inputmode="decimal" autocomplete="off" placeholder="1000" min="0" step="any">
+    </div>
+
+    <div class="card">
+      <h3>The rates</h3>
+      <div class="two">
+        <div>
+          <label for="i-att">Attorney or partner</label>
+          <input id="i-att" type="text" inputmode="decimal" autocomplete="off" placeholder="400" min="0" step="any">
+        </div>
+        <div>
+          <label for="i-asc">Associate attorney</label>
+          <input id="i-asc" type="text" inputmode="decimal" autocomplete="off" placeholder="300" min="0" step="any">
+        </div>
+      </div>
+      <div class="two">
+        <div>
+          <label for="i-par">Paralegal</label>
+          <input id="i-par" type="text" inputmode="decimal" autocomplete="off" placeholder="200" min="0" step="any">
+        </div>
+        <div>
+          <label for="i-adm">Admin or clerical</label>
+          <input id="i-adm" type="text" inputmode="decimal" autocomplete="off" placeholder="100" min="0" step="any">
+        </div>
+      </div>
+      <p class="hint">Most firms bill more than one rate. The attorney you met may quote one number while an associate does the day to day work at another. If you were never told these rates, that is worth knowing on its own. Leave any of them blank and the app still works.</p>
+    </div>
+
+    <button id="saveSetup">Save and see the reality</button>
+    <div class="err" id="setupErr"></div>
+    <p class="foot">This app helps you keep your own record of what you are being charged. It is not legal advice and it is not a substitute for an attorney.</p>
+    <p class="byline">A free tool from <b>AI First Contact</b><br>aifirstcontact.com</p>
+  </section>
+
+  <!-- ============ MONEY ============ -->
+  <section class="screen" id="s-money">
+    <h2>Your money</h2>
+    <p class="lede" id="moneyLede"></p>
+
+    <div class="card">
+      <div class="biglabel">Balance remaining</div>
+      <div class="big" id="bigBal">$0</div>
+      <div class="bar"><i id="bar" style="width:100%"></i></div>
+      <div class="row" style="border:none;padding-top:4px">
+        <span class="k" id="pctTxt"></span>
+        <span class="v sm" id="ofTxt"></span>
+      </div>
+      <div class="alert" id="alertBox"></div>
+    </div>
+
+    <div class="card">
+      <h3>What is left buys</h3>
+      <div class="runway">
+        <div><div class="n" id="rwA">0</div><div class="t">attorney<br>hours</div></div>
+        <div><div class="n" id="rwS">0</div><div class="t">associate<br>hours</div></div>
+        <div><div class="n" id="rwP">0</div><div class="t">paralegal<br>hours</div></div>
+        <div><div class="n" id="rwD">0</div><div class="t">admin<br>hours</div></div>
+      </div>
+      <p class="hint" id="rwHint"></p>
+    </div>
+
+    <div class="card">
+      <h3>Where it went</h3>
+      <div id="byCat"></div>
+    </div>
+
+    <div class="card">
+      <h3>Who billed it</h3>
+      <div id="byRole"></div>
+    </div>
+
+    <button class="ghost" id="toSetup">Edit retainer and rates</button>
+    <p class="foot">Figures reflect only what you have entered. Always check them against the firm's own invoice.</p>
+  </section>
+
+  <!-- ============ ADD ============ -->
+  <section class="screen" id="s-add">
+    <h2>Add a charge</h2>
+    <p class="lede">Take one line off your invoice and enter it here. The last two questions are the ones that matter most.</p>
+
+    <div class="card">
+      <label for="a-date">Date on the invoice</label>
+      <input id="a-date" type="date">
+
+      <label>Who did the work</label>
+      <div class="seg four" id="roleSeg">
+        <button data-role="attorney" class="sel">Attorney</button>
+        <button data-role="associate">Associate</button>
+        <button data-role="paralegal">Paralegal</button>
+        <button data-role="admin">Admin</button>
+      </div>
+
+      <label for="a-desc">What the invoice says</label>
+      <textarea id="a-desc" placeholder="Copy the description from the invoice, word for word"></textarea>
+
+      <div class="two">
+        <div>
+          <label for="a-hrs">Hours</label>
+          <input id="a-hrs" type="text" inputmode="decimal" autocomplete="off" placeholder="1.0" min="0" step="any">
+        </div>
+        <div>
+          <label for="a-rate">Rate</label>
+          <input id="a-rate" type="text" inputmode="decimal" autocomplete="off" placeholder="400" min="0" step="any">
+        </div>
+      </div>
+      <p class="hint" id="amtPreview">Amount: $0.00</p>
+
+      <label for="a-cat">What kind of work was it</label>
+      <select id="a-cat">
+        <option>Legal analysis or advice</option>
+        <option>Drafting or filing</option>
+        <option>Discovery</option>
+        <option>Communications</option>
+        <option>Document handling</option>
+        <option>Court or hearing</option>
+        <option>Research</option>
+        <option>Administrative</option>
+        <option>Expense or other</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h3>The two questions</h3>
+      <label for="a-dlv">What were you supposed to get from this?</label>
+      <textarea id="a-dlv" placeholder="A filed document, an indexed exhibit packet, a served discovery request, an answer to a question"></textarea>
+      <label>Did you actually get it?</label>
+      <div class="seg" id="gotSeg">
+        <button data-got="yes">Yes</button>
+        <button data-got="no">No</button>
+        <button data-got="unknown" class="sel">Not sure</button>
+      </div>
+      <p class="hint">Paying for activity is normal. Paying for activity that never produced the thing it was for is the problem. This is how you spot the difference.</p>
+    </div>
+
+    <button id="saveCharge">Save this charge</button>
+    <div class="err" id="addErr"></div>
+  </section>
+
+  <!-- ============ CHARGES ============ -->
+  <section class="screen" id="s-list">
+    <h2>Your charges</h2>
+    <p class="lede" id="listLede"></p>
+    <div id="chargeList"></div>
+  </section>
+
+  <!-- ============ ASK ============ -->
+  <section class="screen" id="s-ask">
+    <h2>What to ask</h2>
+    <p class="lede">Short, specific questions are easier to say out loud and harder to wave off than big ones. Ask about a line on a page, not about their judgment.</p>
+    <div id="askList"></div>
+
+    <div class="card" style="margin-top:20px">
+      <h3>If you get no real answer</h3>
+      <p style="font-size:14.5px;line-height:1.55;margin:0;color:var(--ink-2)">
+        "It depends on a lot of factors" is a common reply, and sometimes it is honest. But it is still an answer, and you are allowed to write it down with the date. A pattern of non-answers is information about how your case is being handled, and you gather it without arguing with anyone.
+      </p>
+    </div>
+
+    <p class="foot">These are questions about your own bill and your own file. Asking them is ordinary. For questions about the law or your legal strategy, speak with a licensed attorney or your court's self-help center.</p>
+    <p class="byline">This tool is free, and everything in it stays on your phone.<br>
+    If you want help organizing your case rather than doing it alone, that is what we do.<br>
+    <b>AI First Contact</b> &middot; aifirstcontact.com</p>
+  </section>
+
+  <!-- ============ SAY (trial feedback) ============ -->
+  <section class="screen" id="s-say">
+    <h2>Tell us how it went</h2>
+    <p class="lede">This is a trial version. What you say here is how the next one gets fixed. Every box is optional, and you stay anonymous unless you decide otherwise.</p>
+
+    <div class="card">
+      <h3>Three quick ones</h3>
+
+      <label>Did you have a real bill in front of you?</label>
+      <div class="seg" id="q1Seg">
+        <button data-v="a real bill">Yes</button>
+        <button data-v="part of a bill">Part of one</button>
+        <button data-v="no bill, just trying it" class="sel">No</button>
+      </div>
+
+      <label>Could you find the rates and retainer in your agreement?</label>
+      <div class="seg" id="q2Seg">
+        <button data-v="found them easily">Easily</button>
+        <button data-v="took digging">Took digging</button>
+        <button data-v="could not find them" class="sel">Couldn't find</button>
+      </div>
+
+      <label>Would you open this again when the next bill arrives?</label>
+      <div class="seg" id="q3Seg">
+        <button data-v="yes">Yes</button>
+        <button data-v="not sure" class="sel">Not sure</button>
+        <button data-v="no">No</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>In your own words</h3>
+      <label>Did the numbers match what you expected?</label>
+      <textarea id="f-num" placeholder="Higher, lower, about right — and what surprised you."></textarea>
+      <label>Was there something you wanted to enter and found no place for?</label>
+      <textarea id="f-gap" placeholder="A kind of charge, a date, a note."></textarea>
+      <label>Did anything confuse you or stop working?</label>
+      <textarea id="f-bug" placeholder="Where you were and what happened."></textarea>
+      <button id="buildFb">Write it up for me</button>
+    </div>
+
+    <div class="card" id="fbOut" style="display:none">
+      <h3>This is all that leaves your phone</h3>
+      <p class="hint" style="margin:0 0 10px">None of your dollar figures are in it. Read it, change anything you want, then copy it and post it in the group. The group allows anonymous posts, so your name does not have to be on it.</p>
+      <textarea id="fbText" style="min-height:200px"></textarea>
+      <button id="copyFb">Copy it</button>
+      <a id="mailFb" class="btnlink" href="#" target="_blank" rel="noopener">Email it instead</a>
+      <p class="hint" id="copyNote" style="display:none"></p>
+      <p class="hint" style="margin-top:10px">If your mail app does not open, copy the text and send it to <b>accounts@aifirstcontact.com</b>.</p>
+    </div>
+
+    <p class="foot">A person reads these, not a system. If you would rather say it out loud than type it, write that in a box and leave a way to reach you.</p>
+  </section>
+
+</main>
+
+<nav>
+  <button data-go="money" class="on">
+    <svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 3 6-7"/><path d="M3 21h18"/></svg>Money</button>
+  <button data-go="add">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Add</button>
+  <button data-go="list">
+    <svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Charges</button>
+  <button data-go="ask">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.2 2.4c-.7.2-1.2.9-1.2 1.6v.5"/><path d="M12 17h.01"/></svg>Ask</button>
+  <button data-go="say">
+    <svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H8l-5 3 1.2-4.2A8 8 0 1 1 21 12z"/></svg>Tell us</button>
+</nav>
+
+<script>
+(function(){
+"use strict";
+
+var KEY = "retainer-reality-v1";
+var ADMINISH = ["Document handling","Administrative"];
+var ROLES = ["attorney","associate","paralegal","admin"];
+var LAWYER = ["attorney","associate"];
+
+var S = {
+  retainer:0, additional:0, threshold:0,
+  rates:{attorney:0, associate:0, paralegal:0, admin:0},
+  charges:[],
+  ready:false
+};
+
+/* ---------- storage (always guarded) ---------- */
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(!raw) return;
+    var o = JSON.parse(raw);
+    if(o && typeof o === "object"){
+      S.retainer   = +o.retainer   || 0;
+      S.additional = +o.additional || 0;
+      S.threshold  = +o.threshold  || 0;
+      S.rates = {
+        attorney:  +(o.rates && o.rates.attorney)  || 0,
+        associate: +(o.rates && o.rates.associate) || 0,
+        paralegal: +(o.rates && o.rates.paralegal) || 0,
+        admin:     +(o.rates && o.rates.admin)     || 0
+      };
+      S.charges = Array.isArray(o.charges) ? o.charges : [];
+      S.ready = !!o.ready;
+    }
+  }catch(e){ /* storage unavailable: run in memory */ }
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch(e){ /* ignore: page still works for this session */ }
+}
+
+/* ---------- helpers ---------- */
+function $(id){ return document.getElementById(id); }
+/* tolerant number read: handles "$5,000", "5 000", "1.5", blank */
+function num(id){
+  var el = $(id);
+  if(!el) return 0;
+  var raw = String(el.value == null ? "" : el.value);
+  var clean = raw.replace(/[^0-9.\-]/g, "");
+  var parts = clean.split(".");
+  if(parts.length > 2) clean = parts[0] + "." + parts.slice(1).join("");
+  var v = parseFloat(clean);
+  return isFinite(v) ? v : 0;
+}
+function money(n){
+  if(!isFinite(n)) n = 0;
+  var neg = n < 0, v = Math.abs(n);
+  var s = v.toLocaleString(undefined,{minimumFractionDigits:0, maximumFractionDigits:0});
+  return (neg?"-$":"$") + s;
+}
+function money2(n){
+  if(!isFinite(n)) n = 0;
+  return "$" + n.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function hrs(n){
+  if(!isFinite(n) || n<=0) return "0";
+  return n >= 100 ? Math.round(n).toString() : (Math.round(n*10)/10).toString();
+}
+function esc(s){
+  return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function funds(){ return S.retainer + S.additional; }
+function billed(){
+  var t=0; for(var i=0;i<S.charges.length;i++) t += (+S.charges[i].amount||0);
+  return t;
+}
+function roleRate(r){ return S.rates[r] || 0; }
+function roleName(r){
+  return r==="attorney"  ? "Attorney"
+       : r==="associate" ? "Associate attorney"
+       : r==="paralegal" ? "Paralegal"
+       : "Admin";
+}
+
+/* a charge is rate-flagged when clerical work carries a lawyer's rate */
+function rateFlag(c){
+  if(LAWYER.indexOf(c.role) === -1) return null;
+  if(ADMINISH.indexOf(c.category) === -1) return null;
+  var adm = S.rates.admin;
+  if(!adm || !(c.rate > adm)) return null;
+  var over = (+c.hours||0) * (c.rate - adm);
+  if(over <= 0) return null;
+  return over;
+}
+
+/* ---------- navigation ---------- */
+var screens = {
+  setup:"s-setup", money:"s-money", add:"s-add", list:"s-list", ask:"s-ask", say:"s-say"
+};
+function go(name){
+  for(var k in screens){
+    var el = $(screens[k]);
+    if(el) el.classList.toggle("on", k === name);
+  }
+  var btns = document.querySelectorAll("nav button");
+  for(var i=0;i<btns.length;i++){
+    btns[i].classList.toggle("on", btns[i].getAttribute("data-go") === name);
+  }
+  var m = document.querySelector("main");
+  if(m) m.scrollTop = 0;
+  try{
+    if(name === "money") renderMoney();
+    if(name === "list")  renderList();
+  }catch(err){
+    var b = $("setupErr");
+    if(b){ b.textContent = "Display error: " + (err && err.message ? err.message : String(err)); b.classList.add("on"); }
+  }
+}
+var navBtns = document.querySelectorAll("nav button");
+for(var i=0;i<navBtns.length;i++){
+  navBtns[i].addEventListener("click", function(){
+    var t = this.getAttribute("data-go");
+    if(!S.ready && t !== "ask" && t !== "say"){ go("setup"); return; }
+    go(t);
+  });
+}
+
+/* ---------- setup ---------- */
+function fillSetup(){
+  $("i-ret").value = S.retainer   || "";
+  $("i-add").value = S.additional || "";
+  $("i-thr").value = S.threshold  || "";
+  $("i-att").value = S.rates.attorney  || "";
+  $("i-asc").value = S.rates.associate || "";
+  $("i-par").value = S.rates.paralegal || "";
+  $("i-adm").value = S.rates.admin     || "";
+}
+$("saveSetup").addEventListener("click", function(){
+  var box = $("setupErr");
+  function fail(msg){ box.textContent = msg; box.classList.add("on"); }
+  try{
+    box.classList.remove("on");
+    S.retainer   = num("i-ret");
+    S.additional = num("i-add");
+    S.threshold  = num("i-thr");
+    S.rates.attorney  = num("i-att");
+    S.rates.associate = num("i-asc");
+    S.rates.paralegal = num("i-par");
+    S.rates.admin     = num("i-adm");
+    if(S.retainer <= 0){
+      fail("Enter the retainer amount you paid, in the first box, using numbers only. For example 5000.");
+      return;
+    }
+    S.ready = true;
+    save();
+    go("money");
+  }catch(err){
+    fail("Something went wrong: " + (err && err.message ? err.message : String(err)));
+  }
+});
+$("toSetup").addEventListener("click", function(){ fillSetup(); go("setup"); });
+
+/* ---------- money screen ---------- */
+function renderMoney(){
+  var F = funds(), B = billed(), bal = F - B;
+  var pct = F > 0 ? bal / F : 0;
+
+  $("bigBal").textContent = money(bal);
+  $("bigBal").className = "big " + (bal < 0 ? "bad" : (S.threshold && bal < S.threshold) ? "warn" : "ok");
+
+  var w = Math.max(0, Math.min(1, pct)) * 100;
+  var bar = $("bar");
+  bar.style.width = w + "%";
+  bar.className = bal < 0 ? "bad" : (pct < .25 ? "warn" : "");
+
+  $("pctTxt").textContent = F > 0 ? Math.round(Math.max(0,pct)*100) + "% of your funds left" : "";
+  $("ofTxt").textContent  = money(B) + " billed of " + money(F);
+
+  $("moneyLede").textContent = S.charges.length
+    ? "Based on the " + S.charges.length + " charge" + (S.charges.length===1?"":"s") + " you have entered."
+    : "Nothing entered yet. This is what your retainer buys before any work is billed.";
+
+  /* alert */
+  var a = $("alertBox");
+  if(bal < 0){
+    a.className = "alert bad";
+    a.innerHTML = "<b>You are past your retainer.</b> Charges entered exceed what you paid in. Anything further is likely billed on top, or a replenishment request is coming.";
+  } else if(S.threshold && bal < S.threshold){
+    a.className = "alert warn";
+    a.innerHTML = "<b>Getting low.</b> You are below the amount you asked to be warned about. This is the point to decide what happens next, while you still have a choice.";
+  } else if(S.charges.length === 0){
+    a.className = "alert ok";
+    a.innerHTML = "Add charges from your invoice as they come in. You will see the balance move in real time instead of finding out at the end.";
+  } else {
+    a.className = "alert ok";
+    a.innerHTML = "You are above your warning threshold. Keep entering each invoice line as it arrives.";
+  }
+
+  /* runway */
+  var base = bal > 0 ? bal : 0;
+  $("rwA").textContent = S.rates.attorney  ? hrs(base/S.rates.attorney)  : "--";
+  $("rwS").textContent = S.rates.associate ? hrs(base/S.rates.associate) : "--";
+  $("rwP").textContent = S.rates.paralegal ? hrs(base/S.rates.paralegal) : "--";
+  $("rwD").textContent = S.rates.admin     ? hrs(base/S.rates.admin)     : "--";
+
+  var hint;
+  if(!S.rates.attorney && !S.rates.associate){
+    hint = "Add the hourly rates on the setup screen to see how far your balance actually goes.";
+  } else if(S.rates.attorney && S.rates.associate && S.rates.attorney !== S.rates.associate){
+    var gap = Math.abs(S.rates.attorney - S.rates.associate);
+    hint = "The same balance buys " + hrs(base/S.rates.attorney) + " hours at " + money(S.rates.attorney) +
+           " or " + hrs(base/S.rates.associate) + " hours at " + money(S.rates.associate) +
+           ". The " + money(gap) + " difference is why it is fair to ask who is doing each task, and why.";
+  } else {
+    var r = S.rates.attorney || S.rates.associate;
+    hint = "At " + money(r) + " an hour, one hour of lawyer time is " +
+           (funds() ? Math.round((r/funds())*1000)/10 : 0) + "% of everything you paid in.";
+  }
+  $("rwHint").textContent = hint;
+
+  /* by category */
+  var cats = {};
+  for(var i=0;i<S.charges.length;i++){
+    var c = S.charges[i];
+    cats[c.category] = (cats[c.category]||0) + (+c.amount||0);
+  }
+  var keys = Object.keys(cats).sort(function(a,b){ return cats[b]-cats[a]; });
+  var html = "";
+  for(var k=0;k<keys.length;k++){
+    html += '<div class="row"><span class="k">'+esc(keys[k])+'</span><span class="v">'+money(cats[keys[k]])+'</span></div>';
+  }
+  $("byCat").innerHTML = html || '<div class="empty" style="padding:14px 0">Nothing entered yet.</div>';
+
+  /* by role + overpay */
+  var roles = {attorney:0, associate:0, paralegal:0, admin:0}, over = 0;
+  for(var j=0;j<S.charges.length;j++){
+    var ch = S.charges[j];
+    if(roles[ch.role] !== undefined) roles[ch.role] += (+ch.amount||0);
+    var o = rateFlag(ch); if(o) over += o;
+  }
+  var rh = "";
+  ROLES.forEach(function(r){
+    if(roles[r] > 0) rh += '<div class="row"><span class="k">'+roleName(r)+'</span><span class="v">'+money(roles[r])+'</span></div>';
+  });
+  if(over > 0){
+    rh += '<div class="alert bad" style="margin-top:12px"><b>'+money(over)+' of clerical work billed at a lawyer\u2019s rate.</b> '+
+          'Scanning, organizing and filing paper at an attorney or associate hourly rate is one of the fastest ways a retainer disappears. '+
+          'You can ask for it to be moved to a lower rate, or ask to do it yourself.</div>';
+  }
+  $("byRole").innerHTML = rh || '<div class="empty" style="padding:14px 0">Nothing entered yet.</div>';
+}
+
+/* ---------- add screen ---------- */
+var addRole = "attorney", addGot = "unknown";
+function wireSeg(id, cb){
+  var btns = $(id).querySelectorAll("button");
+  for(var i=0;i<btns.length;i++){
+    btns[i].addEventListener("click", function(){
+      var sibs = this.parentNode.querySelectorAll("button");
+      for(var j=0;j<sibs.length;j++) sibs[j].classList.remove("sel");
+      this.classList.add("sel");
+      cb(this);
+    });
+  }
+}
+wireSeg("roleSeg", function(b){
+  addRole = b.getAttribute("data-role");
+  var r = roleRate(addRole);
+  if(r) $("a-rate").value = r;
+  preview();
+});
+wireSeg("gotSeg", function(b){ addGot = b.getAttribute("data-got"); });
+
+function preview(){
+  var amt = num("a-hrs") * num("a-rate");
+  $("amtPreview").textContent = "Amount: " + money2(amt);
+}
+$("a-hrs").addEventListener("input", preview);
+$("a-rate").addEventListener("input", preview);
+
+$("saveCharge").addEventListener("click", function(){
+  var box = $("addErr");
+  function fail(msg){ box.textContent = msg; box.classList.add("on"); }
+  try{
+    box.classList.remove("on");
+    var hrsv = num("a-hrs");
+    var rate = num("a-rate");
+    var desc = $("a-desc").value.trim();
+    if(!desc){ fail("Enter what the invoice says for this line."); return; }
+    if(hrsv <= 0){ fail("Enter the hours for this line, using numbers only. For example 1.5."); return; }
+    if(rate <= 0){ fail("Enter the hourly rate for this line, using numbers only. For example 400."); return; }
+
+    S.charges.unshift({
+      id: Date.now() + "-" + Math.random().toString(36).slice(2,7),
+      date: $("a-date").value || "",
+      role: addRole,
+      desc: desc,
+      hours: hrsv,
+      rate: rate,
+      amount: hrsv * rate,
+      category: $("a-cat").value,
+      deliverable: $("a-dlv").value.trim(),
+      got: addGot
+    });
+    save();
+
+    $("a-desc").value = ""; $("a-hrs").value = ""; $("a-dlv").value = "";
+    preview();
+    go("list");
+  }catch(err){
+    fail("Something went wrong: " + (err && err.message ? err.message : String(err)));
+  }
+});
+
+/* ---------- charge list ---------- */
+function renderList(){
+  var el = $("chargeList");
+  if(!S.charges.length){
+    $("listLede").textContent = "";
+    el.innerHTML = '<div class="empty">No charges entered yet.<br>Tap <b>Add</b> and enter one line from your invoice.</div>';
+    return;
+  }
+  var flagged = 0;
+  for(var q=0;q<S.charges.length;q++){
+    if(rateFlag(S.charges[q]) || S.charges[q].got === "no" || S.charges[q].got === "unknown") flagged++;
+  }
+  $("listLede").textContent = S.charges.length + " charge" + (S.charges.length===1?"":"s") +
+    " entered" + (flagged ? ", " + flagged + " worth a closer look." : ".");
+
+  var h = "";
+  for(var i=0;i<S.charges.length;i++){
+    var c = S.charges[i];
+    h += '<div class="chg">';
+    h +=   '<div class="top"><div class="d">'+esc(c.desc)+'</div><div class="a">'+money(c.amount)+'</div></div>';
+    h +=   '<div class="meta">'+ (c.date ? esc(c.date)+' &middot; ' : '') + roleName(c.role) +
+           ' &middot; ' + hrs(c.hours) + ' hr at ' + money(c.rate) + ' &middot; ' + esc(c.category) + '</div>';
+    if(c.deliverable){
+      h += '<div class="meta" style="margin-top:6px">Expected: '+esc(c.deliverable)+'</div>';
+    }
+    var of_ = rateFlag(c);
+    if(of_) h += '<span class="flag rate">Clerical work at the '+
+                 (c.role==="associate"?"associate":"attorney")+
+                 ' rate &middot; '+money(of_)+' above admin rate</span>';
+    if(c.got === "no")      h += '<span class="flag miss">Did not receive the deliverable</span>';
+    if(c.got === "unknown") h += '<span class="flag miss">Not sure it was delivered</span>';
+    h +=   '<button class="del" data-del="'+esc(c.id)+'">Remove this charge</button>';
+    h += '</div>';
+  }
+  el.innerHTML = h;
+
+  var dels = el.querySelectorAll("[data-del]");
+  for(var d=0; d<dels.length; d++){
+    dels[d].addEventListener("click", function(){
+      var id = this.getAttribute("data-del");
+      S.charges = S.charges.filter(function(x){ return x.id !== id; });
+      save(); renderList();
+    });
+  }
+}
+
+/* ---------- ask screen ---------- */
+var QUESTIONS = [
+  ["Before you pay", [
+    ["What does this retainer cover before I would need to add more?",
+     "Gets you a scope, or shows you there is not one."],
+    ["At what balance do I have to replenish, and by how much?",
+     "Replenishment is usually where the second surprise lives."],
+    ["What is your billing increment?",
+     "Six minutes and fifteen minutes are very different. A two minute email can bill as a quarter hour."],
+    ["Who will be doing the day to day work on my case?",
+     "The person you are impressed by in the meeting is often not the person doing the work."],
+    ["What are the rates for everyone who may bill on my file, not just yours?",
+     "Firms usually bill a partner rate, an associate rate, a paralegal rate and sometimes a clerical rate. You are quoted one number. Ask for the list."],
+    ["If an associate handles something, is it billed at their rate or yours?",
+     "Work done by an associate and reviewed by a partner can appear twice. Ask how that is billed before it happens, not after."],
+    ["Who scans and organizes documents, and at what rate?",
+     "This is the single most common place a retainer quietly drains."],
+    ["Can I organize my own records to keep billed time down?",
+     "Most firms will say yes. Very few will offer."],
+    ["What should I expect to see before anything is filed on my behalf?",
+     "Establishes, early and politely, that you expect to see your own documents."]
+  ]],
+  ["When an invoice arrives", [
+    ["This line says four hours organizing exhibits. Which exhibits were those?",
+     "Specific, factual, and about their own record. Much easier to ask than a broad question."],
+    ["Was that document filed? May I have a copy of it?",
+     "You are entitled to your own file. Asking for a copy is ordinary."],
+    ["I do not recognize this charge. What was it for?",
+     "You do not have to accuse anyone of anything to ask what something was."],
+    ["Going forward I would like to handle the document organizing myself.",
+     "Not a question. A decision you are allowed to make, and it costs them nothing to accept."]
+  ]],
+  ["When something is not moving", [
+    ["What is the next thing that has to happen in my case, and by when?",
+     "Movement and progress are not the same thing. This asks for progress."],
+    ["What is still outstanding from the other side?",
+     "Surfaces whether anyone is actually pushing."],
+    ["If I stopped adding money today, what would happen to my case?",
+     "The most important question in the list, and the one almost nobody asks."]
+  ]]
+];
+function renderAsk(){
+  var h = "";
+  for(var g=0; g<QUESTIONS.length; g++){
+    h += '<div class="qgroup">'+esc(QUESTIONS[g][0])+'</div>';
+    var items = QUESTIONS[g][1];
+    for(var i=0;i<items.length;i++){
+      h += '<div class="q"><div class="say">&ldquo;'+esc(items[i][0])+'&rdquo;</div><div class="why">'+esc(items[i][1])+'</div></div>';
+    }
+  }
+  $("askList").innerHTML = h;
+}
+
+/* ---------- trial feedback ----------
+   Nothing here reads a dollar figure. It reports only how far the person got:
+   how many rates they filled in and how many charges they entered. The person
+   sees the exact text before anything is copied, and can edit it. */
+var FB_EMAIL = "accounts@aifirstcontact.com";
+var FB = { q1:"no bill, just trying it", q2:"could not find them", q3:"not sure" };
+wireSeg("q1Seg", function(b){ FB.q1 = b.getAttribute("data-v"); });
+wireSeg("q2Seg", function(b){ FB.q2 = b.getAttribute("data-v"); });
+wireSeg("q3Seg", function(b){ FB.q3 = b.getAttribute("data-v"); });
+
+function fbProgress(){
+  var set = 0;
+  for(var i=0;i<ROLES.length;i++){ if(S.rates[ROLES[i]] > 0) set++; }
+  var parts = [];
+  parts.push(S.ready ? "finished setup" : "did not finish setup");
+  parts.push(set + " of 4 rates filled in");
+  parts.push(S.charges.length + (S.charges.length === 1 ? " charge entered" : " charges entered"));
+  return parts.join(", ");
+}
+
+function buildFb(){
+  var num = ($("f-num").value || "").trim();
+  var gap = ($("f-gap").value || "").trim();
+  var bug = ($("f-bug").value || "").trim();
+  var L = [];
+  L.push("Retainer Reality - trial feedback");
+  L.push("");
+  L.push("Had: " + FB.q1);
+  L.push("Rates in my agreement: " + FB.q2);
+  L.push("Would use it again: " + FB.q3);
+  L.push("How far I got: " + fbProgress());
+  L.push("");
+  L.push("Did the numbers match what I expected?");
+  L.push(num || "(skipped)");
+  L.push("");
+  L.push("Something I wanted to enter and found no place for:");
+  L.push(gap || "(skipped)");
+  L.push("");
+  L.push("What confused me or stopped working:");
+  L.push(bug || "(skipped)");
+  return L.join("\n");
+}
+
+$("buildFb").addEventListener("click", function(){
+  $("fbText").value = buildFb();
+  $("fbOut").style.display = "block";
+  $("copyNote").style.display = "none";
+  syncMail();
+  try{ $("fbOut").scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){}
+});
+
+function syncMail(){
+  var a = $("mailFb");
+  if(!a) return;
+  a.href = "mailto:" + FB_EMAIL +
+    "?subject=" + encodeURIComponent("Retainer Reality trial feedback") +
+    "&body=" + encodeURIComponent($("fbText").value);
+}
+$("fbText").addEventListener("input", syncMail);
+
+$("copyFb").addEventListener("click", function(){
+  var ta = $("fbText");
+  var note = $("copyNote");
+  function done(msg){ note.textContent = msg; note.style.display = "block"; }
+  var txt = ta.value;
+  function fallback(){
+    try{
+      ta.focus();
+      ta.setSelectionRange(0, txt.length);
+      if(document.execCommand("copy")){
+        done("Copied. Open the group, start a new post, and paste it in. Turn on anonymous posting if you want.");
+        return;
+      }
+    }catch(e){}
+    done("Copying was blocked on this phone. Press and hold the text above, choose Select All, then Copy.");
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){
+      done("Copied. Open the group, start a new post, and paste it in. Turn on anonymous posting if you want.");
+    })["catch"](fallback);
+  } else {
+    fallback();
+  }
+});
+
+/* ---------- boot ---------- */
+load();
+renderAsk();
+fillSetup();
+var t = $("a-date");
+try{ t.value = new Date().toISOString().slice(0,10); }catch(e){}
+if(S.rates.attorney) $("a-rate").value = S.rates.attorney;
+preview();
+if(S.ready){ go("money"); } else { go("setup"); }
+
+})();
+</script>
+</body>
+</html>
